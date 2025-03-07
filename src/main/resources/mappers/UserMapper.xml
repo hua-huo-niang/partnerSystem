@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.qiang.mapper.UserMapper">
+
+    <sql id="userColums">
+    id,username,userAccount,
+    userPassword,avaterUrl,gender,
+    phone,email,userStatus,createTime,updateTime,
+    isDelete,userRole,plantCode,tags</sql>
+
+    <!--Integer addOne(User user);-->
+    <insert id="addOne" parameterType="user">
+        insert into user (<include refid="userColums"/>)
+        values (#{id},#{username},#{userAccount},#{userPassword},
+                #{avaterUrl},#{gender},#{phone},#{email},#{userStatus},#{createTime},
+                #{updateTime},#{isDelete},#{userRole},#{plantCode}, #{tags})
+    </insert>
+
+    <!--Integer addOnRegist(@Param("userAccount") String userAccount, @Param("userPassword") String userPassword);-->
+    <insert id="addOnRegist">
+        insert into user (id,userAccount,userPassword) values (null,#{userAccount},#{userPassword});
+    </insert>
+
+    <!--Integer deleteOne(@Param("id") Integer id);-->
+    <delete id="deleteOne">
+        update user set isDelete = 1  where id = #{id} and isDelete = 0;
+    </delete>
+
+
+    <!--User getOne(Integer id);-->
+    <select id="getOne" resultType="com.qiang.domain.entity.User">
+        select <include refid="userColums"/> from user where id = #{id} and isDelete = 0;
+    </select>
+
+    <!--Integer findOnRegist(@Param("userAccount") String userAccount);-->
+    <select id="findOnRegist" resultType="java.lang.Integer">
+        select count(*) from user where userAccount = #{userAccount} and isDelete = 0;
+    </select>
+
+    <!--Long getIdByUserAccount(@Param("userAccount") String userAccount);-->
+    <select id="getIdByUserAccount" resultType="java.lang.Long">
+        select id from user where userAccount = #{userAccount} and isDelete = 0;
+    </select>
+
+    <!--User getUserByAccount(@Param("userAccount") String userAccount);-->
+    <select id="getUserByAccount" resultType="com.qiang.domain.entity.User">
+        select <include refid="userColums"/> from user where userAccount = #{userAccount} and isDelete = 0;
+    </select>
+</mapper>
