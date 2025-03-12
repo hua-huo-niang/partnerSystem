@@ -28,7 +28,7 @@ class PartnerBackendApplicationTests {
         String userPassword = "333";
         String checkCode = "fjkjf1";
         Result result = userService.register(userAccount, userPassword, checkCode);
-        Assertions.assertEquals(false,result.getSuccess());
+        Assertions.assertEquals(2000,result.getCode());
         System.out.println(result.toString());
     }
 

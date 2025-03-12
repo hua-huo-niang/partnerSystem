@@ -7,22 +7,38 @@
 
     <sql id="userColums">
     id,username,userAccount,
-    userPassword,avaterUrl,gender,
+    userPassword,avatarUrl,gender,
     phone,email,userStatus,createTime,updateTime,
-    isDelete,userRole,plantCode,tags</sql>
+    isDelete,userRole,planetCode,tags,profile,createTime</sql>
+
+    <sql id="userDTOColums">
+        id,username,userAccount,avatarUrl,gender,phone,email,userStatus,userRole,planetCode,tags,profile,createTime</sql>
 
     <!--Integer addOne(User user);-->
     <insert id="addOne" parameterType="user">
         insert into user (<include refid="userColums"/>)
         values (#{id},#{username},#{userAccount},#{userPassword},
-                #{avaterUrl},#{gender},#{phone},#{email},#{userStatus},#{createTime},
-                #{updateTime},#{isDelete},#{userRole},#{plantCode}, #{tags})
+                #{avatarUrl},#{gender},#{phone},#{email},#{userStatus},null,
+                null,#{isDelete},#{userRole},#{planetCode}, #{tags},#{profile})
     </insert>
 
     <!--Integer addOnRegist(@Param("userAccount") String userAccount, @Param("userPassword") String userPassword);-->
     <insert id="addOnRegist">
         insert into user (id,userAccount,userPassword) values (null,#{userAccount},#{userPassword});
     </insert>
+
+    <!--Integer updateOneUser(UserDTO data);-->
+    <update id="updateOneUser" parameterType="userDTO">
+        update user
+        <set>
+            <if test="data.username!=null">username = #{data.username},</if>
+            <if test="data.avatarUrl!=null">username = #{data.avatarUrl},</if>
+            <if test="data.gender!=null">username = #{data.gender},</if>
+            <if test="data.phone!=null">username = #{data.phone},</if>
+            <if test="data.email!=null">username = #{data.email},</if>
+        </set>
+        where id = #{data.id} and isDelete = 0;
+    </update>
 
     <!--Integer deleteOne(@Param("id") Integer id);-->
     <delete id="deleteOne">
@@ -31,8 +47,8 @@
 
 
     <!--User getOne(Integer id);-->
-    <select id="getOne" resultType="com.qiang.domain.entity.User">
-        select <include refid="userColums"/> from user where id = #{id} and isDelete = 0;
+    <select id="getOne" resultType="userDTO">
+        select <include refid="userDTOColums"/> from user where id = #{id} and isDelete = 0;
     </select>
 
     <!--Integer findOnRegist(@Param("userAccount") String userAccount);-->
@@ -48,5 +64,46 @@
     <!--User getUserByAccount(@Param("userAccount") String userAccount);-->
     <select id="getUserByAccount" resultType="com.qiang.domain.entity.User">
         select <include refid="userColums"/> from user where userAccount = #{userAccount} and isDelete = 0;
+    </select>
+
+    <!--List<UserDTO> getUserByTagNameList(List<String> tagNameList);-->
+    <select id="getUserByTagNameList" resultType="com.qiang.domain.DTO.UserDTO">
+        select <include refid="userDTOColums"/>
+            from user
+            where isDelete = 0
+        <if test="tagNameList !=null and tagNameList.size()>0">
+            and
+            <foreach collection="tagNameList" item="tagName" separator="and">
+                tags like concat('%',#{tagName},'%')
+            </foreach>
+        </if>
+    </select>
+
+    <!--List<UserDTO> getAllUsers();-->
+    <select id="getAllUsers" resultType="com.qiang.domain.DTO.UserDTO">
+        select <include refid="userDTOColums"/> from user where isDelete = 0;
+    </select>
+
+    <!--List<UserDTO> getUserByAnyTagName();-->
+    <select id="getUserByAnyTagName" resultType="com.qiang.domain.DTO.UserDTO">
+        select <include refid="userDTOColums"/> from user where isDelete = 0
+        <if test="tagNameList !=null and tagNameList.size()>0">
+            and
+            <foreach collection="tagNameList" item="tagName" separator="or">
+                tags like concat('%',#{tagName},'%')
+            </foreach>
+        </if>
+    </select>
+
+    <!--List<UserDTO> getuserByAnyTagname_josn(List<String> tagNameList);-->
+    <select id="getuserByAnyTagname_josn" resultType="com.qiang.domain.DTO.UserDTO">
+        select <include refid="userDTOColums"/> from user
+        where isDelete = 0
+        <if test="tagNameList !=null and tagNameList.size()>0">
+            and
+            <foreach collection="tagNameList" item="tagName" separator="and">
+                JSON_CONTAINS(tags,concat('"',#{tagName},'"'))
+            </foreach>
+        </if>
     </select>
 </mapper>

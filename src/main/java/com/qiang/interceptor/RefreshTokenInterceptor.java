@@ -24,6 +24,15 @@ public class RefreshTokenInterceptor implements HandlerInterceptor {
     }
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
+        // 获取完整请求 URL，包括路径和查询参数
+        String url = request.getRequestURL().toString();
+        String queryString = request.getQueryString();
+        if (queryString != null) {
+            url += "?" + queryString;
+        }
+
+        // 打印请求 URL
+        System.out.println("拦截的请求路径: " + url);
         //1.获取请求头中的token
         String token = request.getHeader("authorization");
         //2.根据token获取redis中的信息
@@ -42,7 +51,6 @@ public class RefreshTokenInterceptor implements HandlerInterceptor {
         stringRedisTemplate.expire(key,LOGIN_TOKEN_TTL, TimeUnit.MINUTES);
         //7.放行
         return true;
-
     }
 
     @Override

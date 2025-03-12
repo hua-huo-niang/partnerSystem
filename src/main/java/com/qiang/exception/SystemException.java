@@ -13,6 +13,4 @@ public class SystemException extends RuntimeException{
         this. errorCode = errorCode;
         this.description = description;
     }
-
-
 }

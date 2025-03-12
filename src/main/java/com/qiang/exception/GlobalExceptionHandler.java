@@ -8,7 +8,6 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 @RestControllerAdvice
 @Slf4j
 public class GlobalExceptionHandler {
-
     /**
      * 处理系统异常
      * @param ex 系统异常
@@ -23,7 +22,6 @@ public class GlobalExceptionHandler {
         //发送邮件给开发人员，ex对象发送给开发人员
         return Result.fail(ex.getErrorCode(),ex.getDescription());
     }
-
     /**
      * 处理业务异常
      * @param ex 业务异常
@@ -31,9 +29,10 @@ public class GlobalExceptionHandler {
      */
     @ExceptionHandler(BusinessException.class)
     public Result businessExceptionHandler(BusinessException ex){
+        log.error("BusinessException-message"+ex.getMessage());
+        log.error("BusinessException-cause:"+ex.getCause());
         return Result.fail(ex.getErrorCode(),ex.getDescription());
     }
-
     /**
      * 第三类异常，处理其他未意料的异常
      * @param ex 业务异常
@@ -41,6 +40,12 @@ public class GlobalExceptionHandler {
      */
     @ExceptionHandler(Exception.class)
     public Result doOtherException(Exception ex){
+        log.error("Exception-message:"+ex.getMessage());
+        log.error("Exception-cause:"+ex.getCause());
+        log.error("Exception-Class:"+ex.getClass());
+        log.error("Exception-LocalizedMessage:"+ex.getLocalizedMessage());
+        log.error("Exception-Suppressed:"+ex.getSuppressed());
+        log.error("Exception-StackTrace:"+ex.getStackTrace());
         return Result.fail(500,"出异常了",null);
     }
 }

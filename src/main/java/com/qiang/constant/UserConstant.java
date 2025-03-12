@@ -11,18 +11,17 @@ public class UserConstant {
     //注册验证码key过期时间
     public static final Long REGIST_CODE_TTL = 2L;
 
-
     //登录token
     public static final String LOGIN_TOKEN = "LOGIN:TOKEN:";
     //登录token过期时间
     public static final Long LOGIN_TOKEN_TTL = 30L;
 
+    //允许的登录错误次数
     public static final Integer ALLOWABLE_ERROR_COUNT = 10;
     //登录错误次数
     public static final String LOGIN_FAIL = "LOGIN:FAIL:";
     //登录试错冷却
     public static final Long LOGIN_FAIL_TTL = 10L;
-
 
     //用户权限
     public static final Integer ADMINISTRATOR_AUTHORITY = 1;

@@ -11,6 +11,11 @@ public class LoginInterceptor implements HandlerInterceptor {
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
+        System.out.println("正在进入到登录校验拦截器中》》》》》》》》》》》》");
+        if ("OPTIONS".equalsIgnoreCase(request.getMethod())){
+            response.setStatus(HttpServletResponse.SC_OK);
+            return false;//直接返回不执行后续逻辑
+        }
         //没有用户，设置状态码，返回false
         if (UserHolder.getUser()==null) {
             response.setStatus(401);

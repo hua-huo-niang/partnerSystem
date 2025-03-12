@@ -1,17 +1,16 @@
 package com.qiang.service;
 
+import com.qiang.domain.DTO.UserDTO;
 import com.qiang.domain.entity.Result;
 import com.qiang.domain.entity.User;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.net.http.HttpRequest;
+import java.util.List;
 
 @Transactional
 public interface UserService {
     Result addOneUser(User user);
-
-    Result getOneUser(Integer id);
 
     Result register(String userAccount, String userPassword,String checkCode);
 
@@ -19,7 +18,15 @@ public interface UserService {
 
     Result login(String userAccount, String userPassword);
 
+    Result getOneUser(Long id);
+
     Result deleteOneUser(Integer id);
 
     Result logout(HttpServletRequest request);
+
+    Result getUsersByTagName(List<String> tagNameList);
+
+    Result getCurrentUser(String token);
+
+    Result updateUser(UserDTO data);
 }

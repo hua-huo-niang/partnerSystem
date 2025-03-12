@@ -1,6 +1,7 @@
 server:
   port: 8080
-
+  servlet:
+    context-path: /api
 
 spring:
   datasource:
@@ -21,13 +22,23 @@ spring:
           max-idle: 10
           min-idle: 1
           time-between-eviction-runs: 10s
-
 mybatis:
-  type-aliases-package: com.qiang.domain.entity
+  type-aliases-package: com.qiang.domain.entity,com.qiang.domain.DTO
   mapper-locations: classpath*:mappers/*.xml
   configuration:
     log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
     map-underscore-to-camel-case: true
 
-
+knife4j:
+  # 开启增强功能
+  enable: true
+  #开启Swagger的Basic认证功能，默认是false
+  #basic:
+    #enable: true
+    #username: root
+    #password: 1234
+  setting:
+    language: zh_cn
+    #开启生产环境屏蔽
+  production: false
 

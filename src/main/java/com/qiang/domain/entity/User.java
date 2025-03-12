@@ -14,7 +14,7 @@ public class User {
     private String username;
     private String userAccount;
     private String userPassword;
-    private String avaterUrl;
+    private String avatarUrl;
     private Integer gender;
     private String phone;
     private String email;
@@ -23,5 +23,7 @@ public class User {
     private LocalDateTime updateTime;
     private Integer isDelete;
     private Integer userRole;
-    private String plantCode;
+    private String planetCode;
+    private String tags;
+    private String profile;
 }
