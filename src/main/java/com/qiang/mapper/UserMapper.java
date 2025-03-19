@@ -32,4 +32,10 @@ public interface UserMapper {
     List<UserDTO> getuserByAnyTagname_josn(@Param("tagNameList")List<String> tagNameList);
 
     Integer updateOneUser(@Param("data") UserDTO data);
+
+    /**
+     * 批量插入数据库
+     * @param users
+     */
+    Long batchInsert(@Param("users") List<User> users);
 }

@@ -7,6 +7,14 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.web.servlet.HandlerInterceptor;
 
+/**
+ * 登录校验拦截器
+ *  作用：验证当前用户是否已经登录，如果已经登录，当前请求线程中的UserHolder不为空
+ * 拦截效果：
+ *  没登陆的用户将会返回错误信息
+ *  已经登录的用户会被放行
+ */
+
 public class LoginInterceptor implements HandlerInterceptor {
 
     @Override

@@ -1,15 +1,30 @@
+#配置端口和接口路径前缀
 server:
   port: 8080
   servlet:
     context-path: /api
 
 spring:
+  #配置数据库
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://192.168.137.100:3307/partner?useSSL=false&useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai
+    url: jdbc:mysql://192.168.137.100:3307/partner?rewriteBatchedStatements=true&useSSL=false&useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai
     username: root
     password: 1234
+    type: com.alibaba.druid.pool.DruidDataSource
+    druid:
+      initial-size: 5   # 初始连接数
+      min-idle: 5       # 最小空闲连接
+      max-active: 50    # 最大连接数，适当提高
+      max-wait: 100000   # 连接等待超时时间（增加到 100s）
+      time-between-eviction-runs-millis: 30000  # 30秒检查一次空闲连接
+      min-evictable-idle-time-millis: 60000    # 最小空闲存活时间
+      validation-query: SELECT 1 FROM DUAL     # 连接检测
+      test-while-idle: true                    # 开启空闲连接检测
+      test-on-borrow: false
+      test-on-return: false
 
+  #redis配置
   data:
     redis:
       host: 192.168.137.100
@@ -22,6 +37,7 @@ spring:
           max-idle: 10
           min-idle: 1
           time-between-eviction-runs: 10s
+#配置mybatis
 mybatis:
   type-aliases-package: com.qiang.domain.entity,com.qiang.domain.DTO
   mapper-locations: classpath*:mappers/*.xml
@@ -29,6 +45,8 @@ mybatis:
     log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
     map-underscore-to-camel-case: true
 
+
+#Knife4j接口文档
 knife4j:
   # 开启增强功能
   enable: true
@@ -41,4 +59,9 @@ knife4j:
     language: zh_cn
     #开启生产环境屏蔽
   production: false
+logging:
+  level:
+    com.qiang.mapper: DEBUG
+    com.alibaba.druid.pool: DEBUG
+
 

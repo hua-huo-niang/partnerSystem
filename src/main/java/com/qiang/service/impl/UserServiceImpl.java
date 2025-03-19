@@ -2,26 +2,29 @@ package com.qiang.service.impl;
 
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.bean.copier.CopyOptions;
+import cn.hutool.core.date.StopWatch;
 import cn.hutool.core.map.MapUtil;
-import cn.hutool.core.util.IdUtil;
-import cn.hutool.core.util.NumberUtil;
-import cn.hutool.core.util.ReUtil;
-import cn.hutool.core.util.StrUtil;
+import cn.hutool.core.util.*;
 import cn.hutool.crypto.digest.BCrypt;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.qiang.domain.DTO.UserDTO;
 import com.qiang.domain.entity.Result;
 import com.qiang.domain.entity.User;
+import com.qiang.domain.entity.UserHolderEntity;
 import com.qiang.exception.BusinessException;
 import com.qiang.mapper.UserMapper;
 import com.qiang.service.UserService;
+import com.qiang.util.LuaUtil;
 import com.qiang.util.UserHolder;
 import jakarta.servlet.http.HttpServletRequest;
-import org.apache.ibatis.annotations.Options;
-import org.apache.tomcat.util.http.parser.Authorization;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.ibatis.session.ExecutorType;
+import org.apache.ibatis.session.SqlSession;
+import org.apache.ibatis.session.SqlSessionFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.data.redis.core.script.DefaultRedisScript;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -33,7 +36,7 @@ import java.util.stream.Collectors;
 import static com.qiang.constant.UserConstant.*;
 import static com.qiang.util.ErrorCode.*;
 
-
+@Slf4j
 @Service
 public class UserServiceImpl implements UserService {
     @Autowired
@@ -67,7 +70,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public Result deleteOneUser(Integer id) {
         //1.获取当前登录用户的权限
-        UserDTO currentUser = UserHolder.getUser();
+        UserHolderEntity currentUser = UserHolder.getUser();
         Integer userRole = currentUser.getUserRole();
         if (userRole!=ADMINISTRATOR_AUTHORITY){
             throw new BusinessException(ERROR_AUTH,"用户权限不足");
@@ -117,22 +120,35 @@ public class UserServiceImpl implements UserService {
         //6. 如果不为空，直接返回redis中的用户信息
         return Result.ok(SUCCESS,userMap);
     }
-
     @Override
-    public Result updateUser(UserDTO data) {
+    public Result updateUser(UserDTO data, String token) {
+        String key = LOGIN_TOKEN+token;
+        //校验用户权限，看看是不是当前用户。用当前登录的信息和要修改的信息进行比较
+        if (!UserHolder.getUser().getId().equals(data.getId())) {
+            throw new BusinessException(ERROR_PARAMS,"只能修改自己的信息！");
+        }
+        List<String> args = new ArrayList<>();
         //1.数据库修改数据
-        Integer count = userMapper.updateOneUser(data);
+        Integer dbCount = userMapper.updateOneUser(data);
         //2.如果修改失败则返回错误
-        if (count<=0){
+        if (dbCount<=0){
             throw new BusinessException(ERROR_SYSTEM,"系统异常，更新失败");
         }
-        //3.将redis中的数据进行删除，保证数据一致性
-        //TODO 可以考虑使用redission来优化redis中的数据删除   //或者使用lua脚本执行数据删除
-        //3.1.将key中的数据删除
-        //3.2.在将token设置为空值
-
-        return Result.ok(SUCCESS,count);
+        //3.修改redis中数据，这里使用lua脚本执行
+        //TODO 可以考虑使用redission来优化redis中的数据删除，也就是加锁保证线程安全
+        Arrays.stream(ReflectUtil.getFields(UserDTO.class)).forEach(field -> {
+            Object value = ReflectUtil.getFieldValue(data, field);
+            if (ObjectUtil.isNotEmpty(value)){
+                args.add(field.getName());//将key放入
+                args.add(value.toString());//将value放入
+            }
+        });
+        //执行lua脚本语句 更新redis中的数据
+        LuaUtil.updateUser(stringRedisTemplate, Collections.singletonList(key), args);
+        return Result.ok(SUCCESS,dbCount);
     }
+
+
 
     /**
      * 根据标签列表去查询用户。如果用户带有这个标签，则返回这个用户。

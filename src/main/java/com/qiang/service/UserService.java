@@ -28,5 +28,7 @@ public interface UserService {
 
     Result getCurrentUser(String token);
 
-    Result updateUser(UserDTO data);
+    Result updateUser(UserDTO data, String token);
+
+
 }

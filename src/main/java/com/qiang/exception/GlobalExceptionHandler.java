@@ -38,7 +38,7 @@ public class GlobalExceptionHandler {
      * @param ex 业务异常
      * @return Result 统一响应对象
      */
-    @ExceptionHandler(Exception.class)
+   /* @ExceptionHandler(Exception.class)
     public Result doOtherException(Exception ex){
         log.error("Exception-message:"+ex.getMessage());
         log.error("Exception-cause:"+ex.getCause());
@@ -47,5 +47,5 @@ public class GlobalExceptionHandler {
         log.error("Exception-Suppressed:"+ex.getSuppressed());
         log.error("Exception-StackTrace:"+ex.getStackTrace());
         return Result.fail(500,"出异常了",null);
-    }
+    }*/
 }

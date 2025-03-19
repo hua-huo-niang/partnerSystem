@@ -1,19 +1,14 @@
 package com.qiang.controller;
-
 import cn.hutool.core.bean.BeanUtil;
-import cn.hutool.core.collection.ListUtil;
 import cn.hutool.core.util.StrUtil;
 import com.github.xiaoymin.knife4j.annotations.ApiOperationSupport;
 import com.qiang.domain.DTO.UserDTO;
 import com.qiang.domain.entity.Result;
 import com.qiang.exception.BusinessException;
 import com.qiang.service.UserService;
-import com.qiang.util.ErrorCode;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
-
-import java.net.http.HttpRequest;
 import java.util.List;
 import java.util.Map;
 
@@ -73,7 +68,7 @@ public class UserController {
 
     /**
      * 获取当前用户的信息
-     * @param null
+     * @param
      * @return Result 统一响应对象
      */
     @GetMapping("/current")
@@ -100,12 +95,16 @@ public class UserController {
      * @return  Result 统一响应对象
      */
     @PutMapping("/update")
-    public Result updateUser(@RequestBody UserDTO data){
+    public Result updateUser(@RequestBody UserDTO data,HttpServletRequest request){
         System.out.println(data);
         if (BeanUtil.isEmpty(data)) {
             throw new BusinessException(ERROR_PARAMS,"没有要修改的信息！");
         }
-        return userService.updateUser(data);
+        String token = request.getHeader("Authorization");
+        if (StrUtil.isBlank(token)){
+            throw new BusinessException(ERROR_STATUS,"用户状态异常，为登录！");
+        }
+        return userService.updateUser(data,token);
     }
 
     /**

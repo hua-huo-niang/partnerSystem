@@ -1,12 +1,4 @@
 package com.qiang.once.importUserInfo;
-import cn.hutool.core.util.StrUtil;
-import com.alibaba.excel.EasyExcel;
-import com.alibaba.excel.read.metadata.ReadSheet;
-
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
-
 
 /**
  * 最简单的读
@@ -16,7 +8,7 @@ import java.util.stream.Collectors;
  */
 
 public class UserInfoRead {
-    public static void main(String[] args) {
+    /*public static void main(String[] args) {
         String fileName = "D:\\c\\study\\java\\code\\伙伴匹配项目\\伙伴匹配系统后端代码\\partner_backend\\src\\main\\resources\\prodExcel.xlsx";
 //        ImportBYDoRead(fileName);
         List<UserInfo> list = EasyExcel.read(fileName).head(UserInfo.class).sheet().doReadSync();
@@ -31,7 +23,7 @@ public class UserInfoRead {
 
     static public void ImportBYDoRead(String fileName){
         EasyExcel.read(fileName, UserInfo.class, new UserInfoListener()).sheet().doRead();//直接读取出来
-    }
+    }*/
 
 
 }

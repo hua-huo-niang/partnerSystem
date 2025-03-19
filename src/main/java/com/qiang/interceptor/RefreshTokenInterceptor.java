@@ -1,7 +1,7 @@
 package com.qiang.interceptor;
 
 import cn.hutool.core.bean.BeanUtil;
-import com.qiang.domain.DTO.UserDTO;
+import com.qiang.domain.entity.UserHolderEntity;
 import com.qiang.util.UserHolder;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -15,6 +15,16 @@ import static com.qiang.constant.UserConstant.LOGIN_TOKEN;
 import static com.qiang.constant.UserConstant.LOGIN_TOKEN_TTL;
 
 
+/**
+ * 登录token有效期刷新拦截器
+ * 主要作用：
+ *  拦截当前这个用户的所有请求，并将redis中的token有效期进行刷新
+ * 次要作用：
+ *  封装UserHolder，在当前业务请求中标识用户，知道是哪一个用户在使用业务
+ * 拦截效果：
+ *  全部放行，登录校验在LoginInterceptor中进行
+ *  在请求响应的时候，将UserHolder进行删除。因为Tomcat服务器的线程是使用的线程池中的，不删除会对其他线程造成影响
+ */
 public class RefreshTokenInterceptor implements HandlerInterceptor {
     private StringRedisTemplate stringRedisTemplate;
 
@@ -42,11 +52,11 @@ public class RefreshTokenInterceptor implements HandlerInterceptor {
         if (map.isEmpty()){
             return true;
         }
-        //4.将查询到的数据封装为userDTO对象
-        UserDTO userDTO = BeanUtil.fillBeanWithMap(map, new UserDTO(), false);
+        //4.将查询到的数据封装为UserHolderEntity对象
+        UserHolderEntity userHolderEntity = BeanUtil.fillBeanWithMap(map, new UserHolderEntity(), false);
         //5.将数据保存到ThreadLocal中
-        UserHolder.saveUser(userDTO);
-        System.out.println(userDTO);
+        UserHolder.saveUser(userHolderEntity);
+        System.out.println("当前登录的用户是："+userHolderEntity);
         //6.刷新token有效期
         stringRedisTemplate.expire(key,LOGIN_TOKEN_TTL, TimeUnit.MINUTES);
         //7.放行

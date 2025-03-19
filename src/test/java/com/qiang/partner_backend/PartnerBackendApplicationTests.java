@@ -9,6 +9,9 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.redis.core.StringRedisTemplate;
+import java.math.BigDecimal;
+import java.util.concurrent.atomic.AtomicInteger;
+
 
 @SpringBootTest
 class PartnerBackendApplicationTests {
@@ -42,6 +45,8 @@ class PartnerBackendApplicationTests {
         redisTemplate.opsForValue().set("test","test");
         String result = redisTemplate.opsForValue().get("test");
         System.out.println(result);
+        Class<AtomicInteger> atomicIntegerClass = AtomicInteger.class;
+        Class<Integer> integerClass = Integer.class;
+        Class<BigDecimal> bigDecimalClass = BigDecimal.class;
     }
-
 }
