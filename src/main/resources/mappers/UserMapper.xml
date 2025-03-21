@@ -6,7 +6,7 @@
 <mapper namespace="com.qiang.mapper.UserMapper">
 
     <sql id="userColums">
-    username,userAccount,
+    id,username,userAccount,
     userPassword,avatarUrl,gender,phone,email,
     userStatus,isDelete,userRole,planetCode,tags,profile</sql>
 
@@ -16,7 +16,7 @@
     <!--Integer addOne(User user);-->
     <insert id="addOne" parameterType="user">
          insert  into user (<include refid="userColums"/>)
-        values (#{username},#{userAccount},#{userPassword},
+        values (null,#{username},#{userAccount},#{userPassword},
                 #{avatarUrl},#{gender},#{phone},#{email},#{userStatus},
                 #{isDelete},#{userRole},#{planetCode}, #{tags},#{profile})
     </insert>
@@ -32,10 +32,11 @@
         update user
         <set>
             <if test="data.username!=null">username = #{data.username},</if>
-            <if test="data.avatarUrl!=null">username = #{data.avatarUrl},</if>
-            <if test="data.gender!=null">username = #{data.gender},</if>
-            <if test="data.phone!=null">username = #{data.phone},</if>
-            <if test="data.email!=null">username = #{data.email},</if>
+            <if test="data.avatarUrl!=null">avatarUrl = #{data.avatarUrl},</if>
+            <if test="data.gender!=null">gender = #{data.gender},</if>
+            <if test="data.phone!=null">phone = #{data.phone},</if>
+            <if test="data.email!=null">email = #{data.email},</if>
+            <if test="data.tags!=null">tags = #{data.tags},</if>
         </set>
         where id = #{data.id} and isDelete = 0;
     </update>
@@ -95,8 +96,8 @@
         </if>
     </select>
 
-    <!--List<UserDTO> getuserByAnyTagname_josn(List<String> tagNameList);-->
-    <select id="getuserByAnyTagname_josn" resultType="com.qiang.domain.DTO.UserDTO">
+    <!--List<UserDTO> getuserByAllTagname_josn(List<String> tagNameList);-->
+    <select id="getuserByAllTagname_josn" resultType="com.qiang.domain.DTO.UserDTO">
         select <include refid="userDTOColums"/> from user
         where isDelete = 0
         <if test="tagNameList !=null and tagNameList.size()>0">
@@ -111,9 +112,50 @@
     <insert id="batchInsert">
         insert into user (<include refid="userColums"/>) values
             <foreach collection="users" item="user" separator=",">
-                (#{user.username},#{user.userAccount},#{user.userPassword},
+                (null,#{user.username},#{user.userAccount},#{user.userPassword},
                 #{user.avatarUrl},#{user.gender},#{user.phone},#{user.email},#{user.userStatus},
                 #{user.isDelete},#{user.userRole},#{user.planetCode}, #{user.tags},#{user.profile})
             </foreach>
     </insert>
+
+    <!--Integer getAllUsersCount();-->
+    <select id="getAllUsersCount" resultType="java.lang.Integer">
+            select count(1) from user where isDelete = 0;
+    </select>
+
+    <!--List<UserDTO> getUsersByPage(Integer start, Integer count);-->
+    <select id="getUsersByPage" resultType="com.qiang.domain.DTO.UserDTO">
+        select <include refid="userDTOColums"/> from user where isDelete = 0 limit #{start},#{count}
+    </select>
+
+    <!--String getTagNameByUserId(Long userId);-->
+    <select id="getTagNameByUserId" resultType="java.lang.String">
+        select tags from user where isDelete = 0 and id = #{id}
+    </select>
+
+    <!--List<UserDTO> getuserByAnyTagnamePage(List<String> tagNameList, Integer offset, Integer size);-->
+    <select id="getuserByAnyTagnamePage" resultType="com.qiang.domain.DTO.UserDTO">
+        select <include refid="userDTOColums"/> from user
+        where isDelete = 0
+        <if test="tagNameList !=null and tagNameList.size()>0">
+            and
+            <foreach collection="tagNameList" item="tagName" separator="or">
+                JSON_CONTAINS(tags,concat('"',#{tagName},'"'))
+            </foreach>
+        </if>
+        limit #{offset},#{size}
+    </select>
+
+    <!--List<UserDTO> getuserByAnyTagnamePageWithCount(List<String> tagNameList, Integer count);-->
+    <select id="getuserByAnyTagnamePageWithCount" resultType="com.qiang.domain.DTO.UserDTO">
+        select <include refid="userDTOColums"/> from user
+        where isDelete = 0
+        <if test="tagNameList !=null and tagNameList.size()>0">
+            and
+            <foreach collection="tagNameList" item="tagName" separator="or">
+                JSON_CONTAINS(tags,concat('"',#{tagName},'"'))
+            </foreach>
+        </if>
+        limit 0,#{count}
+    </select>
 </mapper>

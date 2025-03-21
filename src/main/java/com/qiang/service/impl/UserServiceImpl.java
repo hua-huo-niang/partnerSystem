@@ -2,12 +2,14 @@ package com.qiang.service.impl;
 
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.bean.copier.CopyOptions;
-import cn.hutool.core.date.StopWatch;
+import cn.hutool.core.collection.ListUtil;
 import cn.hutool.core.map.MapUtil;
 import cn.hutool.core.util.*;
 import cn.hutool.crypto.digest.BCrypt;
+import cn.hutool.json.JSONUtil;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
+import com.qiang.domain.DTO.PageResultDTO;
 import com.qiang.domain.DTO.UserDTO;
 import com.qiang.domain.entity.Result;
 import com.qiang.domain.entity.User;
@@ -19,12 +21,8 @@ import com.qiang.util.LuaUtil;
 import com.qiang.util.UserHolder;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.ibatis.session.ExecutorType;
-import org.apache.ibatis.session.SqlSession;
-import org.apache.ibatis.session.SqlSessionFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
-import org.springframework.data.redis.core.script.DefaultRedisScript;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -33,6 +31,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
+
 import static com.qiang.constant.UserConstant.*;
 import static com.qiang.util.ErrorCode.*;
 
@@ -150,6 +149,7 @@ public class UserServiceImpl implements UserService {
 
 
 
+
     /**
      * 根据标签列表去查询用户。如果用户带有这个标签，则返回这个用户。
      * @param tagNameList 查询的标签列表
@@ -160,7 +160,7 @@ public class UserServiceImpl implements UserService {
         /*
         * 1.方法一：sql查询，like %% and like %% (存储的是json格式的字符串，而不是json)
         * 2.方法二：内存查询。先用sql查询出大概的，再在内存中过过滤
-        * 3.方法三：sql大致查询出含有部分的，内存种再仔细过滤
+        * 3.方法三：sql大致查询出含有部分的，内存中再仔细过滤
         * 4.方法四：当数据库连接足够，空间足够的时候，使用并发查询
         * 5.方法五：当数据库中存储的是json，可以使用json特有的查询方式，配合上内存过滤*/
 
@@ -192,7 +192,7 @@ public class UserServiceImpl implements UserService {
      */
     private Result getUsersByTagName_json(List<String> tagNameList) {
         //大致查询数据库
-        List<UserDTO> userDTOS = userMapper.getuserByAnyTagname_josn(tagNameList);
+        List<UserDTO> userDTOS = userMapper.getuserByAllTagname_josn(tagNameList);
         //判断非空
         if (userDTOS.isEmpty()) {
             throw new BusinessException(ERROR_RESULT,"不存在这样的用户！");
@@ -231,7 +231,7 @@ public class UserServiceImpl implements UserService {
      * 根据标签列表查询包含所有标签的用户。
      * sql大致查询，查询出包含任意标签的用户。内存中再仔细过滤。
      * @param tagNameList
-     * @return
+     * @return Result 统一响应对象
      */
     private Result getUsersByTagName_sql_memery(List<String> tagNameList) {
         //在sql中大致查询
@@ -480,4 +480,54 @@ public class UserServiceImpl implements UserService {
     }
 
 
+    /**
+     * 分页查询查询推荐用户给当前用户  数据范围为100条
+     * @param pageNum 当前页的下标 从1开始 默认为1
+     * @param pageSize  当前页的内容大小 默认为8
+     * @return  Result 统一响应对象
+     */
+    @Override
+    public Result recommendUsersByPage(Integer pageNum, Integer pageSize) {
+        //获取当前用户
+        Long userId = UserHolder.getUser().getId();
+        //先查询redis缓存
+                            //String key = String.format(PRECACHE_USER, userId, pageNum, pageSize);
+        String key = PRECACHE_RECOMMEND_USER+userId;
+        String resultStr = stringRedisTemplate.opsForValue().get(key);
+        List<UserDTO> userDTOS = JSONUtil.toList(resultStr, UserDTO.class);
+        //如果为空，就查询数据库
+        if (userDTOS==null||userDTOS.isEmpty()) {
+            //获取当前用户的标签列表
+            String tagNameStr = userMapper.getTagNameByUserId(userId);
+            //判断标签列表的非空 其实不需要判断，如果是空，会默认返回前100
+            /*if (StrUtil.isBlank(tagNameStr)){
+                //为空则使用默认的推荐，找前几位
+                userDTOS = userMapper.getUsersByPage(pageNum,pageSize);
+            }*/
+            List<String> tagNameList = JSONUtil.toList(tagNameStr, String.class);
+            //根据标签找用户
+            userDTOS = userMapper.getuserByAnyTagnamePageWithCount(tagNameList,PRECACHE_RECOMMEND_USER_COUNT);
+            //缓存数据
+            stringRedisTemplate.opsForValue().set(key,JSONUtil.toJsonStr(userDTOS));
+            stringRedisTemplate.expire(key,PRECACHE_RECOMMEND_USER_COUNT, TimeUnit.MINUTES);//设置有效时间
+        }
+        //非空，则分页数据
+            //创建一个分页结果对象
+        PageResultDTO pageResult = new PageResultDTO();
+        int total = userDTOS.size();
+        int fromIndex = (pageNum-1)*pageSize;
+        int toIndex = Math.min(fromIndex+pageSize,total);
+        List<UserDTO> resultList = userDTOS.subList(fromIndex,toIndex);
+            //封装数据
+        encapsulateResultPage(pageResult,pageNum, resultList.size(), resultList);
+            //返回结果
+        return Result.ok(SUCCESS,pageResult);
+    }
+
+    private static void encapsulateResultPage(PageResultDTO pageResult,Integer pageNum, Integer pageSize,  List<UserDTO> resultList) {
+        pageResult.setPageNum(pageNum);
+        pageResult.setPageSize(pageSize);
+        pageResult.setSize(resultList.size());
+        pageResult.setRecords(resultList);
+    }
 }

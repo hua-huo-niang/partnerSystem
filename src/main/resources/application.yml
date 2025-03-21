@@ -8,9 +8,12 @@ spring:
   #配置数据库
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://192.168.137.100:3307/partner?rewriteBatchedStatements=true&useSSL=false&useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai
-    username: root
-    password: 1234
+    #url: jdbc:mysql://192.168.137.100:3307/partner?rewriteBatchedStatements=true&useSSL=false&useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai
+    #username: root
+    #password: 1234
+    url: jdbc:mysql://116.205.235.161/partner-backend?rewriteBatchedStatements=true&useSSL=false&useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai
+    username: partner-backend
+    password: 123456
     type: com.alibaba.druid.pool.DruidDataSource
     druid:
       initial-size: 5   # 初始连接数
@@ -27,10 +30,12 @@ spring:
   #redis配置
   data:
     redis:
-      host: 192.168.137.100
+      #host: 192.168.137.100
+      host: 116.205.235.161
       port: 6379
       password: 123456
       database: 1
+      redissonDataBase: 2
       lettuce:
         pool:
           max-active: 10

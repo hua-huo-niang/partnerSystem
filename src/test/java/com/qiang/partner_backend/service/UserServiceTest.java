@@ -1,20 +1,27 @@
 package com.qiang.partner_backend.service;
+import java.time.LocalDateTime;
 
+import cn.hutool.core.date.DateTime;
 import cn.hutool.core.date.StopWatch;
 import com.alibaba.excel.EasyExcel;
+import com.qiang.domain.DTO.UserDTO;
 import com.qiang.domain.entity.Result;
 import com.qiang.domain.entity.User;
+import com.qiang.mapper.UserMapper;
 import com.qiang.service.InsertService;
 import com.qiang.service.UserService;
+import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.scheduling.annotation.Scheduled;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
 @SpringBootTest
+@Slf4j
 public class UserServiceTest{
 
     @Autowired
@@ -23,12 +30,30 @@ public class UserServiceTest{
     @Autowired
     private InsertService insertService;
 
+    @Autowired
+    private UserMapper userMapper;
+
     @Test
     void testSearchUserByTagNameList(){
         List<String> str = Arrays.asList("java","python");
         Result result = userService.getUsersByTagName(str);
         System.out.println(result);
 
+    }
+
+    @Test
+    void testUpdateUser(){
+        UserDTO user =new UserDTO();
+        user.setId(1940690L);
+        user.setUsername("huaguoniang");
+        user.setAvatarUrl("http://baidu.com");
+        user.setGender(0);
+        user.setPhone("123901231");
+        user.setEmail("310@qq.com");
+        user.setUserStatus(0);
+        user.setTags("[\"java\"]");
+        user.setProfile("");
+        Integer count = userMapper.updateOneUser(user);
     }
 
 
@@ -146,6 +171,12 @@ public class UserServiceTest{
         insertService.excelReadAndBatchInsert("src/main/resources/testExcel.xlsx",100000,20);
         stopWatch.stop();
         System.out.println("成功导入数据！耗时："+stopWatch.getTotalTimeMillis()+"ms");
+        User user = new User();
+    }
 
+
+    @Scheduled(cron = "0/2 * * * * ?")
+    public void index1(){
+        log.info("定时任务1，2秒执行一次，time：" + DateTime.now() + " 线程：" + Thread.currentThread().getName());
     }
 }

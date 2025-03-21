@@ -26,4 +26,18 @@ public class UserConstant {
     //用户权限
     public static final Integer ADMINISTRATOR_AUTHORITY = 1;
     public static final Integer DOMESTIC_AUTHORITY = 0;
+
+
+
+    //缓存预热
+//    public static final String PRECACHE_USER = "PRECACHE:USER:%d:%d:%d";
+    public static final String PRECACHE_RECOMMEND_USER = "PRECACHE:USER:";
+
+    //缓存预热有效期
+    public static final Long PRECACHE_RECOMMEND_USER_TTL = 30L;
+    //缓存预热的条数
+    public static final Integer PRECACHE_RECOMMEND_USER_COUNT = 100;
+    //缓存预热定时任务的分布式锁
+    public static final String LOCK_RECOMMEND_PRECACHE_SCHEDULED = "LOCK:RECOMMEND:PRECACHE:SCHEDULED:";
+    public static final Long LOCK_PRECOMMEND_PRECACHE_TTL = 10L;
 }

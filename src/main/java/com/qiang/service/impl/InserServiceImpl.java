@@ -6,7 +6,6 @@ import com.qiang.domain.entity.User;
 import com.qiang.exception.BusinessException;
 import com.qiang.mapper.UserMapper;
 import com.qiang.once.importUserInfo.UserInfoListener;
-import com.qiang.once.importUserInfo.UserInfoListener2;
 import com.qiang.service.InsertService;
 import com.qiang.service.UserService;
 import lombok.extern.slf4j.Slf4j;
@@ -156,6 +155,7 @@ public class InserServiceImpl implements InsertService {
     @Override
     public void excelReadAndBatchInsert(String filePath, Integer threshold, Integer threadPoolSize) {
         EasyExcel.read(filePath,User.class,new UserInfoListener(threshold,threadPoolSize,this))
+//        EasyExcel.read(filePath,User.class,new UserInfoListener2(userService))
                 .sheet()
                 .doRead();
     }

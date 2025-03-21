@@ -135,6 +135,19 @@ public class UserController {
     }
 
 
+    @GetMapping("/recommend")
+    public Result RecommendUsers(@RequestParam(value = "pageNum",required = false) Integer pageNum ,
+                                 @RequestParam(value = "pageSize",required = false) Integer pageSize){
+        //判断参数非空，然后进行初始化
+        if (pageNum==null||pageNum==0){
+            pageNum = 1;
+        }
+        if (pageSize==null||pageSize==0){
+            pageSize = 8;
+        }
+        return userService.recommendUsersByPage(pageNum,pageSize);
+    }
+
 
 
 }

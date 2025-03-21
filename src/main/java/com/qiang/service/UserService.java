@@ -30,5 +30,5 @@ public interface UserService {
 
     Result updateUser(UserDTO data, String token);
 
-
+    Result recommendUsersByPage(Integer pageNum, Integer pageSize);
 }

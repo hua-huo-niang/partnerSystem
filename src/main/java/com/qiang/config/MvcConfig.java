@@ -21,9 +21,9 @@ public class MvcConfig implements WebMvcConfigurer {
         //拦截除了登录注册以外的所有请求
         registry.addInterceptor(new LoginInterceptor())
                 .excludePathPatterns(
-                        "/api/user/regist/**",
+                        "/user/regist/**",
                         "/user/login/**",
-                        "/api/user/sendCode/**",
+                        "/user/sendCode/**",
                         "/static/**",
                         "/webjars/**",
                         "/favicon.ico",
