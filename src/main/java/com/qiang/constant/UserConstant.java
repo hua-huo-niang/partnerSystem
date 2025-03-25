@@ -38,6 +38,6 @@ public class UserConstant {
     //缓存预热的条数
     public static final Integer PRECACHE_RECOMMEND_USER_COUNT = 100;
     //缓存预热定时任务的分布式锁
-    public static final String LOCK_RECOMMEND_PRECACHE_SCHEDULED = "LOCK:RECOMMEND:PRECACHE:SCHEDULED:";
+    public static final String LOCK_RECOMMEND_PRECACHE_SCHEDULED = "LOCK:USER:RECOMMEND:PRECACHE:SCHEDULED:";
     public static final Long LOCK_PRECOMMEND_PRECACHE_TTL = 10L;
 }

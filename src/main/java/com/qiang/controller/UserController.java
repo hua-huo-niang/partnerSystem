@@ -3,8 +3,8 @@ import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.util.StrUtil;
 import com.github.xiaoymin.knife4j.annotations.ApiOperationSupport;
 import com.qiang.domain.DTO.UserDTO;
-import com.qiang.domain.entity.Result;
-import com.qiang.exception.BusinessException;
+import com.qiang.comment.Result;
+import com.qiang.comment.exception.BusinessException;
 import com.qiang.service.UserService;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,8 +12,8 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.Map;
 
-import static com.qiang.util.ErrorCode.ERROR_PARAMS;
-import static com.qiang.util.ErrorCode.ERROR_STATUS;
+import static com.qiang.comment.ErrorCode.ERROR_PARAMS;
+import static com.qiang.comment.ErrorCode.ERROR_STATUS;
 
 @RestController
 @RequestMapping("/user")

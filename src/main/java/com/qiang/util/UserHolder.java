@@ -1,6 +1,6 @@
 package com.qiang.util;
 
-import com.qiang.domain.entity.UserHolderEntity;
+import com.qiang.domain.Holder.UserHolderEntity;
 
 /**
  * UserHolder类的作用是：

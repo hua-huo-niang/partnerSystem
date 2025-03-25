@@ -5,20 +5,24 @@
 
 <mapper namespace="com.qiang.mapper.UserMapper">
 
-    <sql id="userColums">
+    <sql id="userGetColums">
     id,username,userAccount,
     userPassword,avatarUrl,gender,phone,email,
-    userStatus,isDelete,userRole,planetCode,tags,profile</sql>
+    userStatus,isDelete,userRole,planetCode,tags,profile,createTime</sql>
 
     <sql id="userDTOColums">
         id,username,userAccount,avatarUrl,gender,phone,email,userStatus,userRole,planetCode,tags,profile,createTime</sql>
 
+    <sql id="userInsertColums">
+        username,userAccount,userPassword,avatarUrl,gender,phone,email,userRole,planetCode,tags,profile
+    </sql>
+
+
     <!--Integer addOne(User user);-->
-    <insert id="addOne" parameterType="user">
-         insert  into user (<include refid="userColums"/>)
-        values (null,#{username},#{userAccount},#{userPassword},
-                #{avatarUrl},#{gender},#{phone},#{email},#{userStatus},
-                #{isDelete},#{userRole},#{planetCode}, #{tags},#{profile})
+    <insert id="addOne" parameterType="userAddDO">
+         insert  into user (<include refid="userInsertColums"/>)
+        values (#{username},#{userAccount},#{userPassword},
+                #{avatarUrl},#{gender},#{phone},#{email},#{userRole},#{planetCode}, #{tags},#{profile})
     </insert>
 
     <!--Integer addOnRegist(@Param("userAccount") String userAccount, @Param("userPassword") String userPassword);-->
@@ -28,7 +32,7 @@
 
 
     <!--Integer updateOneUser(UserDTO data);-->
-    <update id="updateOneUser" parameterType="userDTO">
+    <update id="updateOneUser" parameterType="userUpdateDO">
         update user
         <set>
             <if test="data.username!=null">username = #{data.username},</if>
@@ -37,6 +41,7 @@
             <if test="data.phone!=null">phone = #{data.phone},</if>
             <if test="data.email!=null">email = #{data.email},</if>
             <if test="data.tags!=null">tags = #{data.tags},</if>
+            <if test="data.profile!=null">profile = #{data.profile},</if>
         </set>
         where id = #{data.id} and isDelete = 0;
     </update>
@@ -63,12 +68,12 @@
     </select>
 
     <!--User getUserByAccount(@Param("userAccount") String userAccount);-->
-    <select id="getUserByAccount" resultType="com.qiang.domain.entity.User">
-        select <include refid="userColums"/> from user where userAccount = #{userAccount} and isDelete = 0;
+    <select id="getUserByAccount" resultType="user">
+        select <include refid="userGetColums"/> from user where userAccount = #{userAccount} and isDelete = 0;
     </select>
 
     <!--List<UserDTO> getUserByTagNameList(List<String> tagNameList);-->
-    <select id="getUserByTagNameList" resultType="com.qiang.domain.DTO.UserDTO">
+    <select id="getUserByTagNameList" resultType="userDTO">
         select <include refid="userDTOColums"/>
             from user
             where isDelete = 0
@@ -81,12 +86,12 @@
     </select>
 
     <!--List<UserDTO> getAllUsers();-->
-    <select id="getAllUsers" resultType="com.qiang.domain.DTO.UserDTO">
+    <select id="getAllUsers" resultType="userDTO">
         select <include refid="userDTOColums"/> from user where isDelete = 0;
     </select>
 
     <!--List<UserDTO> getUserByAnyTagName();-->
-    <select id="getUserByAnyTagName" resultType="com.qiang.domain.DTO.UserDTO">
+    <select id="getUserByAnyTagName" resultType="userDTO">
         select <include refid="userDTOColums"/> from user where isDelete = 0
         <if test="tagNameList !=null and tagNameList.size()>0">
             and
@@ -97,7 +102,7 @@
     </select>
 
     <!--List<UserDTO> getuserByAllTagname_josn(List<String> tagNameList);-->
-    <select id="getuserByAllTagname_josn" resultType="com.qiang.domain.DTO.UserDTO">
+    <select id="getuserByAllTagname_josn" resultType="userDTO">
         select <include refid="userDTOColums"/> from user
         where isDelete = 0
         <if test="tagNameList !=null and tagNameList.size()>0">
@@ -110,7 +115,7 @@
 
     <!--void batchInsert(List<User> users);-->
     <insert id="batchInsert">
-        insert into user (<include refid="userColums"/>) values
+        insert into user (<include refid="userGetColums"/>) values
             <foreach collection="users" item="user" separator=",">
                 (null,#{user.username},#{user.userAccount},#{user.userPassword},
                 #{user.avatarUrl},#{user.gender},#{user.phone},#{user.email},#{user.userStatus},
@@ -124,7 +129,7 @@
     </select>
 
     <!--List<UserDTO> getUsersByPage(Integer start, Integer count);-->
-    <select id="getUsersByPage" resultType="com.qiang.domain.DTO.UserDTO">
+    <select id="getUsersByPage" resultType="userDTO">
         select <include refid="userDTOColums"/> from user where isDelete = 0 limit #{start},#{count}
     </select>
 
@@ -134,7 +139,7 @@
     </select>
 
     <!--List<UserDTO> getuserByAnyTagnamePage(List<String> tagNameList, Integer offset, Integer size);-->
-    <select id="getuserByAnyTagnamePage" resultType="com.qiang.domain.DTO.UserDTO">
+    <select id="getuserByAnyTagnamePage" resultType="userDTO">
         select <include refid="userDTOColums"/> from user
         where isDelete = 0
         <if test="tagNameList !=null and tagNameList.size()>0">
@@ -147,7 +152,7 @@
     </select>
 
     <!--List<UserDTO> getuserByAnyTagnamePageWithCount(List<String> tagNameList, Integer count);-->
-    <select id="getuserByAnyTagnamePageWithCount" resultType="com.qiang.domain.DTO.UserDTO">
+    <select id="getuserByAnyTagnamePageWithCount" resultType="userDTO">
         select <include refid="userDTOColums"/> from user
         where isDelete = 0
         <if test="tagNameList !=null and tagNameList.size()>0">

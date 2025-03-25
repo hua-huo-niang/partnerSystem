@@ -2,7 +2,7 @@ package com.qiang.once.importUserInfo;
 
 import com.alibaba.excel.context.AnalysisContext;
 import com.alibaba.excel.read.listener.ReadListener;
-import com.qiang.domain.entity.User;
+import com.qiang.domain.BO.User;
 import com.qiang.service.UserService;
 
 /**

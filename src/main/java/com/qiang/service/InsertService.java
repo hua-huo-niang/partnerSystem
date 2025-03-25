@@ -1,6 +1,6 @@
 package com.qiang.service;
 
-import com.qiang.domain.entity.User;
+import com.qiang.domain.BO.User;
 
 import java.util.List;
 

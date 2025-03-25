@@ -1,4 +1,4 @@
-package com.qiang.domain.entity;
+package com.qiang.domain.BO;
 
 import com.alibaba.excel.annotation.ExcelProperty;
 import lombok.AllArgsConstructor;

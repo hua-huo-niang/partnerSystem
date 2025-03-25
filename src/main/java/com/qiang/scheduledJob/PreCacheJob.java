@@ -25,8 +25,8 @@ public class PreCacheJob {
     private StringRedisTemplate stringRedisTemplate;
     @Autowired
     private RedissonClient redissonClient;
-    //@Scheduled(cron = "0  0/4 * * ?") //每四个小时更新一次
-    @Scheduled(cron = "0 0/1 * * * ?") //每20秒更新一次
+    @Scheduled(cron = "0 0 0/4 * * ?") //每四个小时更新一次
+//    @Scheduled(cron = "0 0/1 * * * ?") //每20秒更新一次
     public void doCacheRecommend(){
         //设置锁
         RLock lock = redissonClient.getLock(LOCK_RECOMMEND_PRECACHE_SCHEDULED);

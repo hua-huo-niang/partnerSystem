@@ -1,6 +1,6 @@
-package com.qiang.exception;
+package com.qiang.comment.exception;
 
-import com.qiang.util.ErrorCode;
+import com.qiang.comment.ErrorCode;
 import lombok.Data;
 
 @Data

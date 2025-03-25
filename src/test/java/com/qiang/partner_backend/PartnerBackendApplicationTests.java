@@ -1,7 +1,7 @@
 package com.qiang.partner_backend;
 
 import cn.hutool.core.util.StrUtil;
-import com.qiang.domain.entity.Result;
+import com.qiang.comment.Result;
 import com.qiang.service.UserService;
 import jakarta.annotation.Resource;
 import org.junit.jupiter.api.Assertions;

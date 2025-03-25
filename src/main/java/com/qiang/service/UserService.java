@@ -1,8 +1,8 @@
 package com.qiang.service;
 
 import com.qiang.domain.DTO.UserDTO;
-import com.qiang.domain.entity.Result;
-import com.qiang.domain.entity.User;
+import com.qiang.comment.Result;
+import com.qiang.domain.BO.User;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.transaction.annotation.Transactional;
 

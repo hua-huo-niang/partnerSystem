@@ -1,4 +1,4 @@
-package com.qiang.domain.entity;
+package com.qiang.domain.Holder;
 
 import lombok.Data;
 

@@ -2,8 +2,8 @@ package com.qiang.service.impl;
 
 import cn.hutool.core.collection.ListUtil;
 import com.alibaba.excel.EasyExcel;
-import com.qiang.domain.entity.User;
-import com.qiang.exception.BusinessException;
+import com.qiang.domain.BO.User;
+import com.qiang.comment.exception.BusinessException;
 import com.qiang.mapper.UserMapper;
 import com.qiang.once.importUserInfo.UserInfoListener;
 import com.qiang.service.InsertService;
@@ -23,7 +23,7 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import static com.qiang.util.ErrorCode.ERROR_PARAMS;
+import static com.qiang.comment.ErrorCode.ERROR_PARAMS;
 
 @Service
 @Slf4j

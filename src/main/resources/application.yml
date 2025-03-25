@@ -35,7 +35,7 @@ spring:
       port: 6379
       password: 123456
       database: 1
-      redissonDataBase: 2
+      redissonDataBase: 1
       lettuce:
         pool:
           max-active: 10
@@ -44,7 +44,7 @@ spring:
           time-between-eviction-runs: 10s
 #配置mybatis
 mybatis:
-  type-aliases-package: com.qiang.domain.entity,com.qiang.domain.DTO
+  type-aliases-package: com.qiang.domain.BO,com.qiang.domain.DTO,com.qiang.domain.DO
   mapper-locations: classpath*:mappers/*.xml
   configuration:
     log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
@@ -68,5 +68,3 @@ logging:
   level:
     com.qiang.mapper: DEBUG
     com.alibaba.druid.pool: DEBUG
-
-

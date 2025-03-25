@@ -2,19 +2,19 @@ package com.qiang.service.impl;
 
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.bean.copier.CopyOptions;
-import cn.hutool.core.collection.ListUtil;
 import cn.hutool.core.map.MapUtil;
 import cn.hutool.core.util.*;
 import cn.hutool.crypto.digest.BCrypt;
 import cn.hutool.json.JSONUtil;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
+import com.qiang.domain.DO.user.UserUpdateDO;
 import com.qiang.domain.DTO.PageResultDTO;
 import com.qiang.domain.DTO.UserDTO;
-import com.qiang.domain.entity.Result;
-import com.qiang.domain.entity.User;
-import com.qiang.domain.entity.UserHolderEntity;
-import com.qiang.exception.BusinessException;
+import com.qiang.comment.Result;
+import com.qiang.domain.BO.User;
+import com.qiang.domain.Holder.UserHolderEntity;
+import com.qiang.comment.exception.BusinessException;
 import com.qiang.mapper.UserMapper;
 import com.qiang.service.UserService;
 import com.qiang.util.LuaUtil;
@@ -33,7 +33,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import static com.qiang.constant.UserConstant.*;
-import static com.qiang.util.ErrorCode.*;
+import static com.qiang.comment.ErrorCode.*;
 
 @Slf4j
 @Service
@@ -47,6 +47,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public Result addOneUser(User user) {
         Integer count  = userMapper.addOne(user);
+
         return Result.ok(SUCCESS,count);
     }
 
@@ -128,15 +129,17 @@ public class UserServiceImpl implements UserService {
         }
         List<String> args = new ArrayList<>();
         //1.数据库修改数据
-        Integer dbCount = userMapper.updateOneUser(data);
+        UserUpdateDO userUpdateDO = new UserUpdateDO();
+        BeanUtil.copyProperties(data,userUpdateDO,false);
+        Integer dbCount = userMapper.updateOneUser(userUpdateDO);
         //2.如果修改失败则返回错误
         if (dbCount<=0){
             throw new BusinessException(ERROR_SYSTEM,"系统异常，更新失败");
         }
         //3.修改redis中数据，这里使用lua脚本执行
         //TODO 可以考虑使用redission来优化redis中的数据删除，也就是加锁保证线程安全
-        Arrays.stream(ReflectUtil.getFields(UserDTO.class)).forEach(field -> {
-            Object value = ReflectUtil.getFieldValue(data, field);
+        Arrays.stream(ReflectUtil.getFields(UserUpdateDO.class)).forEach(field -> {
+            Object value = ReflectUtil.getFieldValue(userUpdateDO, field);
             if (ObjectUtil.isNotEmpty(value)){
                 args.add(field.getName());//将key放入
                 args.add(value.toString());//将value放入

@@ -1,0 +1,220 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.qiang.mapper.TeamMapper">
+
+    <!--sql片段-->
+    <sql id="teamInsertColums">
+        id,teamName,description,maxNum,expireTime,creatorId,captainId,status,password
+    </sql>
+    <sql id="teamSelectAllColums">
+        id,teamName,description,maxNum,expireTime,creatorId,status,password,createTime,updateTime,isDelete,captainId
+    </sql>
+    <sql id="teamSelectToTeamDTO">
+        id,teamName,description,maxNum,expireTime,captainId,status,password,createTime
+    </sql>
+
+
+
+    <!--sql语句-->
+
+
+    <!-- Integer addOneTeam(@Param("team") TeamRequest team);-->
+    <insert id="addOneTeam" useGeneratedKeys="true" keyProperty="id">
+        insert into team (<include refid="teamInsertColums"/>) values
+        (null,#{teamName},#{description},#{maxNum},#{expireTime},#{creatorId},#{captainId},ifnull(#{status}, 0),#{password})
+    </insert>
+
+    <!-- Integer countTeamById(Long id);-->
+    <select id="countTeamByTeamId" resultType="java.lang.Integer">
+        select count(*) from team where isDelete = 0 and id = #{id}
+    </select>
+
+
+    <!--Integer deleteOneTeam(Long id);-->
+    <delete id="deleteOneTeam">
+        update team set isDelete = 1 where id = #{id}
+    </delete>
+
+    <!--Integer updateOneTeam(TeamUpdateRequest request);-->
+    <update id="updateOneTeam">
+        update team
+        <set>
+            <if test="team.teamName!=null">
+                teamName = #{team.teamName},
+            </if>
+            <if test="team.description!=null">
+                description = #{team.description},
+            </if>
+            <if test="team.expireTime!=null">
+                expireTime = #{team.expireTime},
+            </if>
+            <if test="team.status!=null">
+                status = #{team.status},
+            </if>
+            <if test="team.password!=null">
+                password = #{team.password},
+            </if>
+        </set>
+        where isDelete = 0 and id  = #{team.id} grou
+    </update>
+
+
+    <!--TeamDTO getOneTeam(Long id);-->
+    <select id="getOneTeam" resultType="teamGetDTO">
+        select <include refid="teamSelectAllColums"/> from team where id = #{id} and isDelete = 0;
+    </select>
+
+    <!--Integer countTeamByUserId(Long userId);-->
+    <select id="countTeamByUserId" resultType="java.lang.Integer">
+        select count(*) from team where creatorId = #{userId} and isDelete = 0;
+    </select>
+
+    <!--List<TeamListDTO> listTeamByCondition(TeamListDO teamListDO);    使用一次性查询的方式-->
+    <resultMap id="listTeamByConditionResultMap" type="teamListDTO">
+        <id column="teamId" property="teamId"/>
+        <result column="teamName" property="teamName"/>
+        <result column="description" property="description"/>
+        <result column="expireTime" property="expireTime"/>
+        <result column="maxNum" property="maxNum"/>
+        <result column="status" property="status"/>
+        <result column="creatorId" property="creatorId"/>
+        <result column="captainId" property="captainId"/>
+        <result column="updateTime" property="updateTime"/>
+        <result column="createTime" property="createTime"/>
+        <collection property="joinUsers" ofType="userDTO"  column="teamId">
+            <id column="id" property="id"/>
+            <result column="username" property="username"/>
+            <result column="userAccount" property="userAccount"/>
+            <result column="avatarUrl" property="avatarUrl"/>
+            <result column="gender" property="gender"/>
+            <result column="phone" property="phone"/>
+            <result column="email" property="email"/>
+            <result column="userStatus" property="userStatus"/>
+            <result column="userRole" property="userRole"/>
+            <result column="planetCode" property="planetCode"/>
+            <result column="tags" property="tags"/>
+            <result column="profile" property="profile"/>
+            <result column="createTime" property="createTime"/>
+        </collection>
+    </resultMap>
+
+    <select id="listTeamByCondition" resultType="com.qiang.domain.DTO.TeamListDTO" resultMap="listTeamByConditionResultMap">
+        SELECT
+        t.id as teamId, t.teamName, t.description,t.expireTime, t.maxNum,
+        t.status,t.creatorId, t.captainId,t.updateTIme,t.createTime,
+        u.id , u.username, u.userAccount, u.avatarUrl, u.gender,
+        u.phone, u.email, u.userStatus, u.userRole, u.planetCode,
+        u.tags, u.profile,u.createTime
+            from team t left join user_team ut on t.id = ut.teamId left join user u on ut.userId = u.id
+        <trim prefix="where" suffixOverrides="and">
+            <if test="teamId!=null">
+                t.id = #{teamId} and
+            </if>
+            <if test="teamName!=null">
+                t.teamName like concat('%',#{teamName},'%') and
+            </if>
+            <if test="description!=null">
+                t.description like concat('%',#{description},'%') and
+            </if>
+            <if test="maxNum!=null">
+                t.maxNum = #{maxNum} and
+            </if>
+            <if test="captainId!=null">
+                t.captainId = #{captainId} and
+            </if>
+            <if test="status!=null">
+                t.status = #{status} and
+            </if>
+            <if test="expireTime!=null">
+                t.expireTime = #{expireTime} and
+            </if>
+            <if test="searchText!=null">
+               (t.teamName like concat('%',#{searchText},'%') or t.description like concat('%',#{searchText},'%'))
+            </if>
+        </trim>
+        and t.isDelete = 0 and ut.isDelete = 0 and (t.expireTime > now() or t.expireTime is null)
+        ORDER BY ut.createTime ASC
+        limit #{offset},#{size}
+    </select>
+
+
+
+    <!--List<TeamListDTO> listTeamByCondition2(TeamListDO teamListDO);  使用分布分布查询的方式-->
+    <resultMap id="listTeamByConditionResultMap2" type="teamListDTO">
+        <id column="teamId" property="teamId"/>
+        <result column="teamName" property="teamName"/>
+        <result column="description" property="description"/>
+        <result column="expireTime" property="expireTime"/>
+        <result column="maxNum" property="maxNum"/>
+        <result column="status" property="status"/>
+        <result column="creatorId" property="creatorId"/>
+        <result column="captainId" property="captainId"/>
+        <result column="updateTime" property="updateTime"/>
+        <result column="createTime" property="createTime"/>
+        <association property="hashJoinNum" select="getCountHashJoinNumByTeamId" column="teamId" javaType="Integer"/>
+        <association property="captain" select="getCaptainByCaptainId" javaType="userDTO" column="captainId"/>
+        <association property="creator" select="getCreatorByCaptainId" javaType="userDTO" column="creatorId"/>
+        <collection property="joinUsers" ofType="userDTO"
+                    column="teamId" javaType="ArrayList"
+                    select="listUserByTeamId"/>
+    </resultMap>
+    <select id="listTeamByCondition2" resultMap="listTeamByConditionResultMap2">
+        select t.id as teamId, t.teamName, t.description,t.expireTime, t.maxNum,
+               t.status,t.creatorId, t.captainId,t.updateTIme,t.createTime
+        from team t
+        <trim prefix="where" suffixOverrides="and">
+            <if test="teamId!=null">
+                t.id = #{teamId} and
+            </if>
+            <if test="teamName!=null">
+                t.teamName like concat('%',#{teamName},'%') and
+            </if>
+            <if test="description!=null">
+                t.description like concat('%',#{description},'%') and
+            </if>
+            <if test="maxNum!=null">
+                t.maxNum = #{maxNum} and
+            </if>
+            <if test="captainId!=null">
+                t.captainId = #{captainId} and
+            </if>
+            <if test="status!=null">
+                t.status = #{status} and
+            </if>
+            <if test="expireTime!=null">
+                t.expireTime = #{expireTime} and
+            </if>
+            <if test="searchText!=null">
+                (t.teamName like concat('%',#{searchText},'%') or t.description like concat('%',#{searchText},'%'))
+            </if>
+        </trim>
+        and t.isDelete = 0 and (t.expireTime > now() or t.expireTime is null)
+        limit #{offset},#{size}
+    </select>
+
+    <select id="listUserByTeamId" resultType="userDTO">
+        select u.id , u.username, u.userAccount, u.avatarUrl, u.gender,
+               u.phone, u.email, u.userStatus, u.userRole, u.planetCode,
+               u.tags, u.profile,u.createTime
+        from user u left join user_team ut on ut.userId = u.id
+        where ut.teamId = #{teamId} and u.isDelete = 0 and ut.isDelete = 0;
+    </select>
+    <select id="getCountHashJoinNumByTeamId" resultType="Integer">
+        select count(*) from user_team where isDelete = 0 and teamId = #{teamId};
+    </select>
+    <select id="getCaptainByCaptainId" resultType="userDTO">
+        select <include refid="com.qiang.mapper.UserMapper.userDTOColums"/> from user where isDelete = 0 and id = #{captainId}
+    </select>
+    <select id="getCreatorByCaptainId" resultType="userDTO">
+        select <include refid="com.qiang.mapper.UserMapper.userDTOColums"/> from user where isDelete = 0 and id = #{creatorId}
+    </select>
+
+
+    <!--Integer updateCaptainId(Long nextCaptainId,Long teamId);-->
+    <update id="updateCaptainId">
+        update team set captainId = #{nextCaptainId} where id = #{teamId} and isDelete = 0;
+    </update>
+</mapper>

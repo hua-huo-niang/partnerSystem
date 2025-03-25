@@ -1,11 +1,9 @@
-package com.qiang.domain.entity;
+package com.qiang.comment;
 
-import com.qiang.util.ErrorCode;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import javax.sql.rowset.serial.SerialRef;
 import java.util.List;
 
 @Data

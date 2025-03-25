@@ -1,7 +1,7 @@
 package com.qiang.interceptor;
 
-import com.qiang.exception.BusinessException;
-import com.qiang.util.ErrorCode;
+import com.qiang.comment.exception.BusinessException;
+import com.qiang.comment.ErrorCode;
 import com.qiang.util.UserHolder;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;

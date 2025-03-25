@@ -1,6 +1,6 @@
-package com.qiang.exception;
+package com.qiang.comment.exception;
 
-import com.qiang.domain.entity.Result;
+import com.qiang.comment.Result;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;

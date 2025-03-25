@@ -1,4 +1,4 @@
-package com.qiang.util;
+package com.qiang.comment;
 
 import lombok.Getter;
 

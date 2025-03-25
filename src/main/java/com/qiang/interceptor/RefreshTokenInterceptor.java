@@ -1,7 +1,7 @@
 package com.qiang.interceptor;
 
 import cn.hutool.core.bean.BeanUtil;
-import com.qiang.domain.entity.UserHolderEntity;
+import com.qiang.domain.Holder.UserHolderEntity;
 import com.qiang.util.UserHolder;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;

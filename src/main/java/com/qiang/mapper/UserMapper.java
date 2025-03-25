@@ -1,7 +1,8 @@
 package com.qiang.mapper;
 
+import com.qiang.domain.DO.user.UserUpdateDO;
 import com.qiang.domain.DTO.UserDTO;
-import com.qiang.domain.entity.User;
+import com.qiang.domain.BO.User;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
@@ -36,7 +37,7 @@ public interface UserMapper {
      */
     List<UserDTO> getuserByAllTagname_josn(@Param("tagNameList")List<String> tagNameList);
 
-    Integer updateOneUser(@Param("data") UserDTO data);
+    Integer updateOneUser(@Param("data") UserUpdateDO data);
 
     /**
      * 批量插入数据库

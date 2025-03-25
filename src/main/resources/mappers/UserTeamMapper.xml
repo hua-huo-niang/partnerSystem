@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.qiang.mapper.UserTeamMapper">
+    <!--sql片段-->
+    <sql id="insertColums">
+        userId,teamId
+    </sql>
+
+    <!--sql语句-->
+
+    <!-- Integer addOne(UserTeamDO userTeamDO);-->
+    <insert id="addOne">
+        insert into user_team (<include refid="insertColums"/>) values (#{userTeam.userId},#{userTeam.teamId})
+    </insert>
+    <update id="deleteOneTeam">
+        update user_team set isDelete = 1 where teamId = #{teamId}
+    </update>
+
+    <select id="isHashJoin" resultType="java.lang.Integer">
+        select count(*) from user_team where userId = #{userId} and teamId = #{teamId} and isDelete = 0;
+    </select>
+
+    <!--Integer countTeamHashJoin(Long teamId);-->
+    <select id="countTeamHashJoin" resultType="java.lang.Integer">
+        select count(*) from user_team where teamId = #{teamId} and isDelete = 0;
+    </select>
+
+    <!--Integer countUserJoinTeam(Long userId);-->
+    <select id="countUserJoinTeam" resultType="java.lang.Integer">
+        select count(*) from user_team where userId = #{userId} and isDelete = 0;
+    </select>
+
+    <!--List<UserDTO> getAllJoinUser(Long teamId);-->
+    <select id="getAllJoinUser" resultType="com.qiang.domain.DTO.UserDTO">
+        select u.id , u.username, u.userAccount, u.avatarUrl, u.gender,
+               u.phone, u.email, u.userStatus, u.userRole, u.planetCode,
+               u.tags, u.profile,u.createTime
+        from user u left join user_team ut on ut.userId = u.id
+        where teamId = #{teamId}
+    </select>
+
+    <!--Integer quitTeam(Long userId, Long teamId);-->
+    <update id="quitTeam">
+        update user_team set isDelete = 1 where userId = #{userId} and teamId = #{teamId} and isDelete = 0;
+    </update>
+</mapper>
