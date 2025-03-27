@@ -18,4 +18,8 @@ public interface TeamService {
     Result joinTeam(TeamJoinRequest request);
 
     Result quitTeam(TeamQuitRequest request);
+
+    Result listMyJoinTeamByPage(TeamListRequest request);
+
+    Result listMyCreatedTeam(TeamListRequest request);
 }

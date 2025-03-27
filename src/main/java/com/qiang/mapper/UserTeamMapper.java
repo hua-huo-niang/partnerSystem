@@ -1,7 +1,8 @@
 package com.qiang.mapper;
 
 import com.qiang.domain.DO.userTeam.UserTeamAddDO;
-import com.qiang.domain.DTO.UserDTO;
+import com.qiang.domain.DTO.user.UserDTO;
+import com.qiang.domain.DTO.userTeam.UserTeamGetDTO;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
@@ -42,9 +43,9 @@ public interface UserTeamMapper {
 
     /**
      * 根据teamId 将 user_team 表中的有关数据（于teamId的相关数据）删除
-     * @param teamId
+     * @param teamId 队伍id
      */
-    void deleteOneTeam(@Param("teamId") Long teamId);
+    Integer deleteOneTeam(@Param("teamId") Long teamId);
 
     /**
      * 根据队伍的id去查询所有已经入队伍的用户的信息
@@ -60,4 +61,11 @@ public interface UserTeamMapper {
      * @return Integer 改变的行数
      */
     Integer quitTeam(@Param("userId") Long userId, @Param("teamId") Long teamId);
+
+    /**
+     * 根据userId获取所有相关的数据
+     * @param userId 用户id
+     * @return List<UserTeamGetDTO> 封装的数据的列表
+     */
+    List<UserTeamGetDTO> getAllJoinTeam(@Param("userId") Long userId);
 }

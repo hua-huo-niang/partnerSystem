@@ -1,9 +1,7 @@
 package com.qiang.service.impl;
-
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.bean.copier.CopyOptions;
 import cn.hutool.core.collection.CollectionUtil;
-import cn.hutool.core.collection.ListUtil;
 import cn.hutool.core.lang.UUID;
 import cn.hutool.core.map.MapUtil;
 import cn.hutool.core.util.StrUtil;
@@ -14,9 +12,10 @@ import com.qiang.domain.DO.team.TeamAddDO;
 import com.qiang.domain.DO.team.TeamListDO;
 import com.qiang.domain.DO.team.TeamUpdateDO;
 import com.qiang.domain.DO.userTeam.UserTeamAddDO;
-import com.qiang.domain.DTO.TeamGetDTO;
-import com.qiang.domain.DTO.TeamListDTO;
-import com.qiang.domain.DTO.UserDTO;
+import com.qiang.domain.DTO.team.TeamGetDTO;
+import com.qiang.domain.DTO.user.UserDTO;
+import com.qiang.domain.DTO.userTeam.UserTeamGetDTO;
+import com.qiang.domain.Holder.UserHolderEntity;
 import com.qiang.domain.VO.team.TeamGetVO;
 import com.qiang.domain.request.team.*;
 import com.qiang.mapper.TeamMapper;
@@ -24,6 +23,7 @@ import com.qiang.mapper.UserTeamMapper;
 import com.qiang.service.TeamService;
 import com.qiang.service.UserTeamService;
 import com.qiang.util.UserHolder;
+import com.qiang.domain.DTO.team.TeamListDTO;
 import lombok.extern.slf4j.Slf4j;
 import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
@@ -33,6 +33,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 import static com.qiang.comment.ErrorCode.*;
 import static com.qiang.constant.TeamConstant.LOCK_TEAM_JOINTEAM;
@@ -68,7 +69,7 @@ public class TeamServiceImpl implements TeamService {
 
         //创建TeamAddDO,用于与数据库交互的实体类
         TeamAddDO teamAddDO = new TeamAddDO();
-        BeanUtil.copyProperties(request, teamAddDO,false);
+        BeanUtil.copyProperties(request, teamAddDO,CopyOptions.create().setFieldMapping(MapUtil.of("name","teamName")));
 
         //4. 加入队伍到team表中
         Long userId = UserHolder.getUser().getId();
@@ -97,18 +98,31 @@ public class TeamServiceImpl implements TeamService {
     @Override
     @Transactional
     public Result deleteTeam(Long teamId) {
-        //先查询有没有这个队伍，是否已经被删除
-        Integer count = teamMapper.countTeamByTeamId(teamId);
-        if (count==null||count==0) {
-            //没有这个队伍，或者已经被删除
-            throw new BusinessException(ERROR_PARAMS,"该队伍不存在！");
+        if (teamId==null||teamId==0L) {
+            throw new BusinessException(ERROR_PARAMS,"请正确选择要删除的队伍！");
         }
-        count  = teamMapper.deleteOneTeam(teamId);
+        //先查询有没有这个队伍，是否已经被删除
+        TeamGetDTO teamGetDTO = teamMapper.getOneTeam(teamId);
+        if (teamGetDTO==null||BeanUtil.isEmpty(teamGetDTO)){
+            throw new BusinessException(ERROR_PARAMS,"队伍不存在！");
+        }
+        //只有队伍的队长或者管理员才能进行删除队伍
+        UserHolderEntity user = UserHolder.getUser();
+        Long userId = user.getId();
+        Integer userRole = user.getUserRole();
+        Long captainId = teamGetDTO.getCaptainId();
+        if (!captainId.equals(userId)&&!userRole.equals(ADMINISTRATOR_AUTHORITY)){//既不是队长，也不是管理员
+            throw new BusinessException(ERROR_PARAMS,"权限不足！");
+        }
+        Integer count  = teamMapper.deleteOneTeam(teamId);
         if (count==null||count==0){
             throw  new BusinessException(ERROR_SYSTEM,"删除队伍失败！");
         }
         //将user_team中的有关数据全部删除
-        userTeamMapper.deleteOneTeam(teamId);
+        count= userTeamMapper.deleteOneTeam(teamId);
+        if(count==null||count==0){
+            throw new BusinessException(ERROR_SYSTEM,"删除队伍失败！");
+        }
         return Result.ok(SUCCESS,count,"操作成功");
     }
 
@@ -172,7 +186,7 @@ public class TeamServiceImpl implements TeamService {
             throw new BusinessException(ERROR_PARAMS,"该队伍不存在！");
         }
         TeamGetVO vo = new TeamGetVO();
-        BeanUtil.copyProperties(teamGetDTO,vo);
+        BeanUtil.copyProperties(teamGetDTO,vo,CopyOptions.create().setFieldMapping(MapUtil.of("teamName","name")));
         vo.setUserId(teamGetDTO.getCaptainId());
         return Result.ok(SUCCESS,vo);
     }
@@ -183,7 +197,7 @@ public class TeamServiceImpl implements TeamService {
 
         //   - id可以为空，并且不能为0，数据库中id从1开始自增
         //   - teamName不为空，且长度在 2<= length <=20  因为是模糊查询可以短于2，但是不能长于20
-        String teamName = request.getTeamName();
+        String teamName = request.getName();
         if (teamName!=null&&(teamName.length()>20)){
             throw new BusinessException(ERROR_PARAMS,"队伍的名称的字数范围是2~20");
         }
@@ -218,6 +232,9 @@ public class TeamServiceImpl implements TeamService {
         if (searchText!=null&&searchText.length()>512) {
             throw new BusinessException(ERROR_PARAMS,"关键词的字数不能超过512个");
         }
+        if (StrUtil.isBlank(searchText)){
+            request.setSearchText(null);
+        }
         //3. 只有管理员才能查看加密还有非公开的房间
         if (TeamStatusEnum.ENCRYPT.equals(teamStatusEnum)) {
             if (!UserHolder.getUser().getUserRole().equals(ADMINISTRATOR_AUTHORITY)) {
@@ -231,6 +248,7 @@ public class TeamServiceImpl implements TeamService {
         Map<String,String> map =new HashMap<>();
         map.put("userId","captainId");
         map.put("id","teamId");
+        map.put("name","teamName");
         BeanUtil.copyProperties(request,teamListDO, //复制do
                 CopyOptions.create().ignoreNullValue()
                         .setFieldMapping(map));
@@ -251,7 +269,7 @@ public class TeamServiceImpl implements TeamService {
         for (TeamListDTO teamListDTO : result) {
             Long teamId = teamListDTO.getTeamId();
             Integer hashJoin = userTeamMapper.isHashJoin(currentUserId,teamId);
-            teamListDTO.setHashJoin(hashJoin > 0);
+            teamListDTO.setHasJoin(hashJoin > 0);
         }
         //5. 返回结果
         return Result.ok(SUCCESS,result);
@@ -345,14 +363,21 @@ public class TeamServiceImpl implements TeamService {
         if (hashJoin == null || hashJoin <= 0){
             throw new BusinessException(ERROR_USER_OPTIONS,"当前没有加入该队伍！");
         }
-        //4. 如果队伍只剩一人，解散队伍
+        //4. 如果队伍只剩一人，解散队伍。
         Integer countTeamHashJoin = userTeamMapper.countTeamHashJoin(teamId);
-        if (countTeamHashJoin<=1){
-            teamMapper.deleteOneTeam(teamId);//将team删除
-            userTeamMapper.deleteOneTeam(teamId);//将user_team删除
+        if (countTeamHashJoin<=1){//校验到这里，说明当前用户是最有一位用户，且是队长。
+            Integer deleteOneTeam = teamMapper.deleteOneTeam(teamId);//将team删除
+            if (deleteOneTeam==null||deleteOneTeam<=0) {
+                throw new BusinessException(ERROR_SYSTEM,"系统异常！");
+            }
+            Integer deleteOneTeam1 = userTeamMapper.deleteOneTeam(teamId);//将user_team删除
+            if (deleteOneTeam1==null||deleteOneTeam1<=0) {
+                throw new BusinessException(ERROR_SYSTEM,"系统异常！");
+            }
+            return Result.ok(SUCCESS);
         }
         //5. 如果队伍还有其他人
-        //   1. 如果是队长退出队伍，权限转移给第二早加入的用户——先来后到（根据加入的user- team的创建时间来判断）
+        //   1. 如果是队长退出队伍，权限转移给第二早加入的用户——先来后到（根据加入的user_team的创建时间来判断）
         if (userId.equals(team.getCaptainId())){
             List<UserDTO> userDTOList = userTeamMapper.getAllJoinUser(teamId);
             if (CollectionUtil.isEmpty(userDTOList)||userDTOList.size()<=1) {
@@ -360,14 +385,73 @@ public class TeamServiceImpl implements TeamService {
             }
             UserDTO nextCaptain = userDTOList.get(1);
             Long nextCaptainId = nextCaptain.getId();
-            Integer count = teamMapper.updateCaptainId(nextCaptainId,teamId);
+            Integer count = teamMapper.updateCaptainId(nextCaptainId,teamId);//更新队长
+            if (count==null||count<=0){
+                throw new BusinessException(ERROR_SYSTEM,"队长更新失败！");
+            }
         }
         //   2. 非队长，自己退出队伍
-        Integer resultCount = userTeamMapper.quitTeam(userId,teamId);
+        Integer resultCount = userTeamMapper.quitTeam(userId,teamId);//当前用户退出队伍
         if (resultCount==null||resultCount<=0){
             throw new BusinessException(ERROR_SYSTEM,"退出队伍失败！");
         }
-        return null;
+        return Result.ok(SUCCESS,resultCount);
+    }
+
+    @Override
+    public Result listMyJoinTeamByPage(TeamListRequest request) {
+        //核心参数为userId，其余的参数可以为空。不需要校验参数
+        //1. TeamListDO数据持久层交互对象加上一个队伍列表teamIdList
+        //2. 查询出user_team中包含userId所有的数据
+        Long userId = UserHolder.getUser().getId();
+        //查看当前用户是否有加入到任意队伍
+        Integer count = userTeamMapper.countUserJoinTeam(userId);
+        if (count==null||count<=0){
+            throw new BusinessException(ERROR_PARAMS,"当前没有加入任何队伍！");
+        }
+        List<UserTeamGetDTO> userTeamGetDTOList = userTeamMapper.getAllJoinTeam(userId);
+        //3. 使用流进行过滤处理，分组(去重，防止出错，进一步保险)
+        Map<Long, List<UserTeamGetDTO>> map = userTeamGetDTOList.stream().collect(Collectors.groupingBy(UserTeamGetDTO::getTeamId));
+        Set<Long> teamIdSet = map.keySet();
+        //4. 将teamId分装进teamIdList
+        TeamListDO teamListDO = new TeamListDO();
+        teamListDO.setTeamIdSet(teamIdSet);
+            //设置分页参数
+        Integer pageNum = Optional.ofNullable(request.getPageNum()).orElse(1);
+        Integer pageSize = Optional.ofNullable(request.getPageSize()).orElse(8);
+        teamListDO.setOffset((pageNum-1)*pageSize);
+        teamListDO.setSize(pageSize);
+            //将条件封装
+        BeanUtil.copyProperties(request,teamListDO,CopyOptions.create().setFieldMapping(MapUtil.of("name","teamName")));
+        //5. 调用原来的接口，进行条件查询
+        List<TeamListDTO> result = teamMapper.listTeamByCondition2(teamListDO);
+        if (CollectionUtil.isEmpty(result)){
+            throw new BusinessException(ERROR_SYSTEM,"系统出现异常！");
+        }
+        //6. 返回结果
+        return Result.ok(SUCCESS,result);
+    }
+
+    @Override
+    public Result listMyCreatedTeam(TeamListRequest request) {
+        //核心参数为userId，其余的参数可以为空。不需要校验参数
+        //1. 往TeamListDO中添加当前用户的id
+        TeamListDO teamListDO = new TeamListDO();
+        Long userId = UserHolder.getUser().getId();
+        teamListDO.setCaptainId(userId);
+        //封装参数
+        BeanUtil.copyProperties(request,teamListDO,CopyOptions.create().setFieldMapping(MapUtil.of("name","teamName")));
+        Integer pageNum = Optional.ofNullable(request.getPageNum()).orElse(1);
+        Integer pageSize = Optional.ofNullable(request.getPageSize()).orElse(8);
+        teamListDO.setOffset((pageNum-1)*pageSize);
+        teamListDO.setSize(pageSize);
+        //2. 调用方法，查询结果
+        List<TeamListDTO> teamListDTOS = teamMapper.listTeamByCondition(teamListDO);
+        if (CollectionUtil.isEmpty(teamListDTOS)) {
+            throw new BusinessException(ERROR_RESULT,"结果为空！");
+        }
+        //3. 返回结果
+        return Result.ok(SUCCESS,teamListDTOS);
     }
 
 
@@ -382,7 +466,7 @@ public class TeamServiceImpl implements TeamService {
             throw new BusinessException(ERROR_PARAMS,"队伍人数的范围为1~20");
         }
         //   2- 队伍标题：null、2<= length <=20
-        String teamName = request.getTeamName();
+        String teamName = request.getName();
         if (!StrUtil.isBlank(teamName)&&(teamName.length()<2||teamName.length()>20)){
             throw new BusinessException(ERROR_PARAMS,"队伍的标题字数的范围为2~20");
         }

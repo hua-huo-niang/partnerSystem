@@ -1,4 +1,4 @@
-package com.qiang.domain.DTO;
+package com.qiang.domain.DTO.user;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

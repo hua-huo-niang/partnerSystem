@@ -7,7 +7,7 @@
 
     <!--sql片段-->
     <sql id="teamInsertColums">
-        id,teamName,description,maxNum,expireTime,creatorId,captainId,status,password
+        teamName,description,maxNum,expireTime,creatorId,captainId,status,password
     </sql>
     <sql id="teamSelectAllColums">
         id,teamName,description,maxNum,expireTime,creatorId,status,password,createTime,updateTime,isDelete,captainId
@@ -24,7 +24,7 @@
     <!-- Integer addOneTeam(@Param("team") TeamRequest team);-->
     <insert id="addOneTeam" useGeneratedKeys="true" keyProperty="id">
         insert into team (<include refid="teamInsertColums"/>) values
-        (null,#{teamName},#{description},#{maxNum},#{expireTime},#{creatorId},#{captainId},ifnull(#{status}, 0),#{password})
+        (#{teamName},#{description},#{maxNum},#{expireTime},#{creatorId},#{captainId},ifnull(#{status}, 0),#{password})
     </insert>
 
     <!-- Integer countTeamById(Long id);-->
@@ -101,7 +101,7 @@
         </collection>
     </resultMap>
 
-    <select id="listTeamByCondition" resultType="com.qiang.domain.DTO.TeamListDTO" resultMap="listTeamByConditionResultMap">
+    <select id="listTeamByCondition" resultType="com.qiang.domain.DTO.team.TeamListDTO" resultMap="listTeamByConditionResultMap">
         SELECT
         t.id as teamId, t.teamName, t.description,t.expireTime, t.maxNum,
         t.status,t.creatorId, t.captainId,t.updateTIme,t.createTime,
@@ -134,15 +134,16 @@
             <if test="searchText!=null">
                (t.teamName like concat('%',#{searchText},'%') or t.description like concat('%',#{searchText},'%'))
             </if>
+
         </trim>
         and t.isDelete = 0 and ut.isDelete = 0 and (t.expireTime > now() or t.expireTime is null)
-        ORDER BY ut.createTime ASC
+        ORDER BY ut.createTime DESC
         limit #{offset},#{size}
     </select>
 
 
 
-    <!--List<TeamListDTO> listTeamByCondition2(TeamListDO teamListDO);  使用分布分布查询的方式-->
+    <!--List<TeamListDTO> listTeamByCondition2(TeamListDO teamListDO);  使用分步查询的方式-->
     <resultMap id="listTeamByConditionResultMap2" type="teamListDTO">
         <id column="teamId" property="teamId"/>
         <result column="teamName" property="teamName"/>
@@ -154,7 +155,7 @@
         <result column="captainId" property="captainId"/>
         <result column="updateTime" property="updateTime"/>
         <result column="createTime" property="createTime"/>
-        <association property="hashJoinNum" select="getCountHashJoinNumByTeamId" column="teamId" javaType="Integer"/>
+        <association property="hasJoinNum" select="getCountHashJoinNumByTeamId" column="teamId" javaType="Integer"/>
         <association property="captain" select="getCaptainByCaptainId" javaType="userDTO" column="captainId"/>
         <association property="creator" select="getCreatorByCaptainId" javaType="userDTO" column="creatorId"/>
         <collection property="joinUsers" ofType="userDTO"
@@ -188,10 +189,17 @@
                 t.expireTime = #{expireTime} and
             </if>
             <if test="searchText!=null">
-                (t.teamName like concat('%',#{searchText},'%') or t.description like concat('%',#{searchText},'%'))
+                (t.teamName like concat('%',#{searchText},'%') or t.description like concat('%',#{searchText},'%')) and
             </if>
+            <if test="teamIdSet!=null">
+                t.id in
+                <foreach collection="teamIdSet" item="teamId" separator="," open="(" close=")">
+                    #{teamId}
+                </foreach>
+                and
+            </if>
+            t.isDelete = 0 and (t.expireTime > now() or t.expireTime is null)
         </trim>
-        and t.isDelete = 0 and (t.expireTime > now() or t.expireTime is null)
         limit #{offset},#{size}
     </select>
 
@@ -200,7 +208,7 @@
                u.phone, u.email, u.userStatus, u.userRole, u.planetCode,
                u.tags, u.profile,u.createTime
         from user u left join user_team ut on ut.userId = u.id
-        where ut.teamId = #{teamId} and u.isDelete = 0 and ut.isDelete = 0;
+        where ut.teamId = #{teamId} and u.isDelete = 0 and ut.isDelete = 0 ORDER BY ut.createTime desc;
     </select>
     <select id="getCountHashJoinNumByTeamId" resultType="Integer">
         select count(*) from user_team where isDelete = 0 and teamId = #{teamId};

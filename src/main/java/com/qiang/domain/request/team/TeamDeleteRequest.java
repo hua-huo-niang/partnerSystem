@@ -18,5 +18,5 @@ public class TeamDeleteRequest  implements Serializable {
     /**
      * 要删除的id
      */
-    private Long id;
+    private Long teamId;
 }

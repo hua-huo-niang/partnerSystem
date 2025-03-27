@@ -27,7 +27,7 @@ public class Result {
      */
     private String description;
     static public Result ok(ErrorCode errorCode){
-        return new Result(errorCode.getCode(),null,null,null);
+        return new Result(errorCode.getCode(),null,errorCode.getMessgae(),null);
     }
     static public Result ok(ErrorCode errorCode,Object data){
         return new Result(errorCode.getCode(),data,errorCode.getMessgae(),null);

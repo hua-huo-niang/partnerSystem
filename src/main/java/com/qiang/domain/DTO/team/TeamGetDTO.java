@@ -1,4 +1,4 @@
-package com.qiang.domain.DTO;
+package com.qiang.domain.DTO.team;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.AllArgsConstructor;

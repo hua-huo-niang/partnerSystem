@@ -5,7 +5,7 @@ import cn.hutool.core.date.DateTime;
 import cn.hutool.core.date.StopWatch;
 import com.alibaba.excel.EasyExcel;
 import com.qiang.domain.DO.user.UserUpdateDO;
-import com.qiang.domain.DTO.UserDTO;
+import com.qiang.domain.DTO.user.UserDTO;
 import com.qiang.comment.Result;
 import com.qiang.domain.BO.User;
 import com.qiang.mapper.UserMapper;

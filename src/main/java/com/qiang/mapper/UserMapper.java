@@ -1,7 +1,7 @@
 package com.qiang.mapper;
 
 import com.qiang.domain.DO.user.UserUpdateDO;
-import com.qiang.domain.DTO.UserDTO;
+import com.qiang.domain.DTO.user.UserDTO;
 import com.qiang.domain.BO.User;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;

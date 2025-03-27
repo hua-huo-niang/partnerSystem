@@ -10,7 +10,7 @@ import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.qiang.domain.DO.user.UserUpdateDO;
 import com.qiang.domain.DTO.PageResultDTO;
-import com.qiang.domain.DTO.UserDTO;
+import com.qiang.domain.DTO.user.UserDTO;
 import com.qiang.comment.Result;
 import com.qiang.domain.BO.User;
 import com.qiang.domain.Holder.UserHolderEntity;

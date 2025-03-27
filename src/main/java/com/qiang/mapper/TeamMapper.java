@@ -3,8 +3,9 @@ package com.qiang.mapper;
 import com.qiang.domain.DO.team.TeamAddDO;
 import com.qiang.domain.DO.team.TeamListDO;
 import com.qiang.domain.DO.team.TeamUpdateDO;
-import com.qiang.domain.DTO.TeamGetDTO;
-import com.qiang.domain.DTO.TeamListDTO;
+import com.qiang.domain.DTO.team.TeamGetDTO;
+import com.qiang.domain.DTO.team.TeamListDTO;
+import com.qiang.domain.DTO.userTeam.UserTeamGetDTO;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
@@ -80,4 +81,5 @@ public interface TeamMapper {
      * @return Integer 改变的行数
      */
     Integer updateCaptainId(@Param("nextCaptainId") Long nextCaptainId,@Param("teamId") Long teamId);
+
 }

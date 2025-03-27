@@ -3,6 +3,8 @@ package com.qiang.domain.DO.team;
 import lombok.Data;
 
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Set;
 
 @Data
 public class TeamListDO {
@@ -38,6 +40,11 @@ public class TeamListDO {
      * 关键词搜索
      */
     private String searchText;
+    /**
+     * 队伍的id列表
+     * 作用：用于查询用户已经加入的队伍，这个列表就是存放用户已经加入的队伍列表
+     */
+    private Set<Long> teamIdSet;
 
     /**
      * 分页参数的起始下标

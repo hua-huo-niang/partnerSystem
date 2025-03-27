@@ -15,7 +15,7 @@
     <insert id="addOne">
         insert into user_team (<include refid="insertColums"/>) values (#{userTeam.userId},#{userTeam.teamId})
     </insert>
-    <update id="deleteOneTeam">
+    <update id="deleteOneTeam" >
         update user_team set isDelete = 1 where teamId = #{teamId}
     </update>
 
@@ -34,16 +34,23 @@
     </select>
 
     <!--List<UserDTO> getAllJoinUser(Long teamId);-->
-    <select id="getAllJoinUser" resultType="com.qiang.domain.DTO.UserDTO">
+    <select id="getAllJoinUser" resultType="com.qiang.domain.DTO.user.UserDTO">
         select u.id , u.username, u.userAccount, u.avatarUrl, u.gender,
                u.phone, u.email, u.userStatus, u.userRole, u.planetCode,
                u.tags, u.profile,u.createTime
         from user u left join user_team ut on ut.userId = u.id
-        where teamId = #{teamId}
+        where teamId = #{teamId} and u.isDelete = 0;
     </select>
+
 
     <!--Integer quitTeam(Long userId, Long teamId);-->
     <update id="quitTeam">
         update user_team set isDelete = 1 where userId = #{userId} and teamId = #{teamId} and isDelete = 0;
     </update>
+
+
+    <!--List<UserTeamGetDTO> getAllJoinTeam(Long userId);-->
+    <select id="getAllJoinTeam" resultType="userTeamGetDTO">
+        select id, userId, teamId, createTime, updateTime from user_team where isDelete = 0 and userId = #{userId}
+    </select>
 </mapper>

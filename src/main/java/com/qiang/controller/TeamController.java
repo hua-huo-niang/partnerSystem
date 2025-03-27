@@ -29,7 +29,7 @@ public class TeamController {
      */
     @DeleteMapping("/delete")
     public Result deleteTeam(@RequestBody TeamDeleteRequest request){
-        return teamService.deleteTeam(request.getId());
+        return teamService.deleteTeam(request.getTeamId());
     }
 
     /**
@@ -57,7 +57,7 @@ public class TeamController {
      * @param request 查询队伍列表业务的请求封装对象
      * @return Result 统一响应结果对象
      */
-    @GetMapping("list")
+    @GetMapping("/list")
     public Result listTeam(TeamListRequest request){
         return teamService.listTeambyPage(request);
     }
@@ -78,4 +78,25 @@ public class TeamController {
     }
 
 
+    /**
+     * 根据传入的参数，列出用户是队长的队伍
+     * @param request request 查询队伍业务的请求封装对象
+     * @return Result 统一响应结果对象
+     */
+    @GetMapping("/list/my/create")
+    public Result listMyCreatedTeam(TeamListRequest request){
+        return teamService.listMyCreatedTeam(request);
+    }
+
+
+
+    /**
+     * 根据传入的参数，列出用户已经加入的所有队伍
+     * @param request request 查询队伍业务的请求封装对象
+     * @return Result 统一响应结果对象
+     */
+    @GetMapping("/list/my/join")
+    public Result listMyJoinedTeam(TeamListRequest request){
+        return teamService.listMyJoinTeamByPage(request);
+    }
 }

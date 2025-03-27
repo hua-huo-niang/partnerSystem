@@ -17,7 +17,7 @@ public class TeamAddRequest {
     /**
      * 队伍的名称
      */
-    private String teamName;
+    private String name;
     /**
      * 队伍的描述信息
      */

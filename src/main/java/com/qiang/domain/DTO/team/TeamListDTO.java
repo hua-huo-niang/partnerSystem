@@ -1,5 +1,6 @@
-package com.qiang.domain.DTO;
+package com.qiang.domain.DTO.team;
 
+import com.qiang.domain.DTO.user.UserDTO;
 import lombok.Data;
 
 import java.time.LocalDateTime;
@@ -50,11 +51,11 @@ public class TeamListDTO {
     /**
      * 当前队伍已经加入的人数
      */
-    private Integer hashJoinNum;
+    private Integer hasJoinNum;
     /**
      * 当前用户是否已经加入
      */
-    private Boolean hashJoin;
+    private Boolean hasJoin;
 
 
 

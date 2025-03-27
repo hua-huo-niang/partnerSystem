@@ -1,6 +1,6 @@
 package com.qiang.service;
 
-import com.qiang.domain.DTO.UserDTO;
+import com.qiang.domain.DTO.user.UserDTO;
 import com.qiang.comment.Result;
 import com.qiang.domain.BO.User;
 import jakarta.servlet.http.HttpServletRequest;

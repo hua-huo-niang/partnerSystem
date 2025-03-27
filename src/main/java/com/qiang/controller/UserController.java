@@ -2,7 +2,7 @@ package com.qiang.controller;
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.util.StrUtil;
 import com.github.xiaoymin.knife4j.annotations.ApiOperationSupport;
-import com.qiang.domain.DTO.UserDTO;
+import com.qiang.domain.DTO.user.UserDTO;
 import com.qiang.comment.Result;
 import com.qiang.comment.exception.BusinessException;
 import com.qiang.service.UserService;
